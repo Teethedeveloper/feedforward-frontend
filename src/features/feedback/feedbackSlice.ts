@@ -1,7 +1,9 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || "https://feedforward-backend-rdd3.onrender.com";
+// Use VITE_API_URL in .env or default to deployed backend
+const API_URL =
+  import.meta.env.VITE_API_URL || "https://feedforward-backend-rdd3.onrender.com";
 
 export interface Feedback {
   _id?: string;
@@ -24,11 +26,17 @@ const initialState: FeedbackState = {
   error: null,
 };
 
+// Axios instance with credentials (if backend uses cookies/auth)
+const axiosInstance = axios.create({
+  baseURL: API_URL,
+  withCredentials: true, 
+});
+
 // Fetch all feedback
 export const fetchFeedback = createAsyncThunk<Feedback[]>(
   "feedback/fetch",
   async () => {
-    const res = await axios.get<Feedback[]>(`${API_URL}/feedback`);
+    const res = await axiosInstance.get<Feedback[]>("/feedback");
     return res.data;
   }
 );
@@ -38,7 +46,7 @@ export const addFeedback = createAsyncThunk<
   Feedback,
   Omit<Feedback, "_id" | "createdAt" | "upvotes">
 >("feedback/add", async (newFeedback) => {
-  const res = await axios.post<Feedback>(`${API_URL}/feedback`, newFeedback);
+  const res = await axiosInstance.post<Feedback>("/feedback", newFeedback);
   return res.data;
 });
 
@@ -46,7 +54,7 @@ export const addFeedback = createAsyncThunk<
 export const upvoteFeedback = createAsyncThunk<Feedback, string>(
   "feedback/upvote",
   async (id) => {
-    const res = await axios.patch<Feedback>(`${API_URL}/feedback/${id}/upvote`);
+    const res = await axiosInstance.patch<Feedback>(`/feedback/${id}/upvote`);
     return res.data;
   }
 );
@@ -55,7 +63,7 @@ export const upvoteFeedback = createAsyncThunk<Feedback, string>(
 export const deleteFeedback = createAsyncThunk<string, string>(
   "feedback/delete",
   async (id) => {
-    await axios.delete(`${API_URL}/feedback/${id}`);
+    await axiosInstance.delete(`/feedback/${id}`);
     return id;
   }
 );
@@ -73,27 +81,47 @@ const feedbackSlice = createSlice({
       })
       .addCase(fetchFeedback.fulfilled, (state, action) => {
         state.loading = false;
-        state.items = action.payload;
+        state.items = action.payload.sort(
+          (a, b) =>
+            new Date(b.createdAt || "").getTime() -
+            new Date(a.createdAt || "").getTime()
+        );
       })
       .addCase(fetchFeedback.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || "Error fetching feedback";
       })
       // add
+      .addCase(addFeedback.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(addFeedback.fulfilled, (state, action) => {
+        state.loading = false;
         state.items.unshift(action.payload);
       })
-      // upvote
-      .addCase(upvoteFeedback.fulfilled, (state, action) => {
-        const idx = state.items.findIndex((fb) => fb._id === action.payload._id);
-        if (idx !== -1) state.items[idx] = action.payload;
+      .addCase(addFeedback.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || "Failed to add feedback";
       })
-      // delete
-      .addCase(deleteFeedback.fulfilled, (state, action) => {
-        state.items = state.items.filter((fb) => fb._id !== action.payload);
+      // upvote (optimistic)
+      .addCase(upvoteFeedback.pending, (state, action) => {
+        const fb = state.items.find((fb) => fb._id === action.meta.arg);
+        if (fb) fb.upvotes = (fb.upvotes ?? 0) + 1;
+      })
+      .addCase(upvoteFeedback.rejected, (state, action) => {
+        state.error = action.error.message || "Failed to upvote";
+      })
+      // delete (optimistic)
+      .addCase(deleteFeedback.pending, (state, action) => {
+        state.items = state.items.filter((fb) => fb._id !== action.meta.arg);
+      })
+      .addCase(deleteFeedback.rejected, (state, action) => {
+        state.error = action.error.message || "Failed to delete feedback";
       });
   },
 });
 
 export default feedbackSlice.reducer;
+
 
