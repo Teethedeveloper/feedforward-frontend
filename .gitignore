@@ -1,0 +1,80 @@
+# FeedForward
+
+A modern feedback explorer built with **React**, **TypeScript**, and **Vite**.
+
+## Features
+
+- Add, view, upvote(needs improvement), and delete feedback items
+- Group feedback by category (Bug, Feature, Improvement)
+- Search and sort feedback
+- Toast notifications for actions
+- Accessible, responsive UI
+- Optional: JWT authentication for restricted actions
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v18+ recommended)
+- npm or yarn
+
+### Installation
+
+```bash
+npm install
+```
+
+### Running the App
+
+```bash
+npm run dev
+```
+
+The app will start on [http://localhost:5173](http://localhost:5173) by default.
+
+### Building for Production
+
+```bash
+npm run build
+```
+
+### Linting
+
+```bash
+npm run lint
+```
+
+## Project Structure
+
+```
+frontend/
+  ├── src/
+  │   ├── features/
+  │   │   └── feedback/
+  │   │       ├── AddFeedback.tsx
+  │   │       ├── FeedbackList.tsx
+  │   │       └── feedbackSlice.ts
+  │   ├── App.tsx
+  │   ├── index.css
+  │   └── index.html   
+  ├── public/
+  ├── .gitignore
+  └── README.md
+
+```
+
+## Environment Variables
+
+Set your API endpoint in `.env`:
+
+```
+VITE_API_URL=http://localhost:5000
+```
+
+## License
+
+MIT
+
+---
+
+**Built with [Vite](https://vitejs.dev/), [React](https://react.dev/), and [Redux Toolkit](https://redux-toolkit.js.org/) and CSS.**
