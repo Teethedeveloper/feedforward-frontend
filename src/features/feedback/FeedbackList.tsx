@@ -1,20 +1,33 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useAppSelector, useAppDispatch } from "../../hooks";
-import { upvoteFeedback, deleteFeedback } from "./feedbackSlice";
+import {
+  fetchFeedback,
+  upvoteFeedback,
+  deleteFeedback,
+} from "./feedbackSlice";
 import type { Feedback } from "./feedbackSlice";
 import type { RootState } from "../../app/store";
 
 const FeedbackList: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { items, loading, error } = useAppSelector((state: RootState) => state.feedback);
+  const { items, loading, error } = useAppSelector(
+    (state: RootState) => state.feedback
+  );
 
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<"newest" | "oldest">("newest");
-  const [collapsed, setCollapsed] = useState<Record<"Bug" | "Feature" | "Improvement", boolean>>({
+  const [collapsed, setCollapsed] = useState<
+    Record<"Bug" | "Feature" | "Improvement", boolean>
+  >({
     Bug: false,
     Feature: false,
     Improvement: false,
   });
+
+  // Fetch feedback on mount
+  useEffect(() => {
+    dispatch(fetchFeedback());
+  }, [dispatch]);
 
   // Filter + sort feedback
   const filteredAndSorted = useMemo(() => {
@@ -55,21 +68,17 @@ const FeedbackList: React.FC = () => {
       {/* Controls */}
       <div className="controls">
         <input
-          id="feedback-search"
-          name="feedback-search"
           type="text"
-          className="search-input"
           placeholder="Search feedback..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          className="search-input"
           disabled={loading}
         />
         <select
-          id="feedback-sort"
-          name="feedback-sort"
-          className="sort-select"
           value={sort}
           onChange={(e) => setSort(e.target.value as "newest" | "oldest")}
+          className="sort-select"
           disabled={loading}
         >
           <option value="newest">Newest first</option>
@@ -77,47 +86,55 @@ const FeedbackList: React.FC = () => {
         </select>
       </div>
 
-      {loading && <p>Loading feedback...</p>}
+      {loading && <p className="loading">Loading feedback...</p>}
       {error && <p className="form-error">{error}</p>}
-      {!loading && filteredAndSorted.length === 0 && <p className="empty">No feedback found.</p>}
+      {!loading && filteredAndSorted.length === 0 && (
+        <p className="empty">No feedback found.</p>
+      )}
 
       {(["Bug", "Feature", "Improvement"] as const).map((category) => {
         const feedbacks = groups[category];
         return (
-          <div key={category} className="group">
+          <div key={category} className="feedback-group">
             <button
               type="button"
               className="group-header"
               onClick={() => handleToggle(category)}
               aria-expanded={!collapsed[category]}
             >
-              <h3>{category} ({feedbacks.length})</h3>
-              <span className="toggle">{collapsed[category] ? "➕" : "➖"}</span>
+              <h3>
+                {category} ({feedbacks.length})
+              </h3>
+              <span className="toggle-icon">
+                {collapsed[category] ? "➕" : "➖"}
+              </span>
             </button>
 
             {!collapsed[category] && (
               <div className="group-items">
-                {feedbacks.length === 0 && <p className="empty">No {category} feedback yet.</p>}
+                {feedbacks.length === 0 && (
+                  <p className="empty">No {category} feedback yet.</p>
+                )}
 
                 {feedbacks.map((fb) => (
                   <div key={fb._id} className="feedback-card">
-                    <h4>{fb.title}</h4>
-                    <p>{fb.description}</p>
-                    <p className="meta">
+                    <h4 className="feedback-title">{fb.title}</h4>
+                    <p className="feedback-description">{fb.description}</p>
+                    <p className="feedback-meta">
                       {fb.category} | {fb.upvotes ?? 0} upvotes
                     </p>
-
-                    <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+                    <div className="feedback-actions">
                       <button
-                        className="btn-primary"
-                        onClick={() => fb._id && dispatch(upvoteFeedback(fb._id))}
+                        className="btn btn-upvote"
+                        onClick={() =>
+                          fb._id && dispatch(upvoteFeedback(fb._id))
+                        }
                         disabled={loading}
                       >
                         👍 {fb.upvotes ?? 0}
                       </button>
                       <button
-                        className="btn-primary"
-                        style={{ background: "#e31b1b" }}
+                        className="btn btn-delete"
                         onClick={() => fb._id && handleDelete(fb._id)}
                         disabled={loading}
                       >
