@@ -38,6 +38,8 @@ npm run lint
 
 ```
 Project Structure
+
+
 frontend/
   ├── src/
   │   ├── app/
@@ -48,7 +50,7 @@ frontend/
   │   │       ├── FeedbackList.tsx
   │   │       └── feedbackSlice.ts
   │   ├── App.tsx
-  │   ├── main.tsx       <-- added here
+  │   ├── main.tsx       
   │   ├── hooks.ts
   │   ├── index.css
   │   └── index.html
