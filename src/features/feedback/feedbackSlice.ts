@@ -29,7 +29,7 @@ const initialState: FeedbackState = {
 // Axios instance with credentials (if backend uses cookies/auth)
 const axiosInstance = axios.create({
   baseURL: API_URL,
-  withCredentials: true, 
+  withCredentials: false, 
 });
 
 // Fetch all feedback
