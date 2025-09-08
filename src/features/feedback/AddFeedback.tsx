@@ -46,65 +46,75 @@ const AddFeedback: React.FC = () => {
   const isSubmitDisabled = loading || !title.trim() || !description.trim();
 
   return (
-    <form className="feedback-form" onSubmit={handleSubmit} aria-busy={loading}>
-      <h2 className="form-title">Add Feedback</h2>
+  <form className="feedback-form" onSubmit={handleSubmit} aria-busy={loading}>
+    <h2 className="form-title">Add Feedback</h2>
 
-      {(localError || error) && <p className="form-error">{localError || error}</p>}
+    {(localError || error) && <p className="form-error">{localError || error}</p>}
 
-      <div className="form-group">
-        <label htmlFor="title">Title</label>
-        <input
-          id="title"
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Enter feedback title"
-          disabled={loading}
-          required
-          maxLength={100}
-        />
-      </div>
+    {/* Title */}
+    <div className="form-group">
+      <label htmlFor="title">Title</label>
+      <input
+        id="title"
+        type="text"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder="Enter feedback title"
+        disabled={loading}
+        required
+        maxLength={100}
+      />
+    </div>
 
-      <div className="form-group">
-        <label htmlFor="desc">Description</label>
-        <textarea
-          id="desc"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Describe the feedback..."
-          disabled={loading}
-          required
-          maxLength={500}
-        />
-      </div>
+    {/* Description */}
+    <div className="form-group">
+      <label htmlFor="desc">Description</label>
+      <textarea
+        id="desc"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        placeholder="Describe the feedback..."
+        disabled={loading}
+        required
+        maxLength={500}
+      />
+    </div>
 
-      <div className="form-group">
-        <label htmlFor="cat">Category</label>
-        <select
-          id="cat"
-          value={category}
-          onChange={(e) =>
-            setCategory(e.target.value as "Bug" | "Feature" | "Improvement")
-          }
-          disabled={loading}
-          title="Select feedback category"
-        >
-          <option value="Bug">Bug</option>
-          <option value="Feature">Feature</option>
-          <option value="Improvement">Improvement</option>
-        </select>
-      </div>
-
-      <button
-        type="submit"
-        className="btn-primary"
-        disabled={isSubmitDisabled}
-        aria-busy={loading}
+    {/* Category */}
+    <div className="form-group">
+      <label htmlFor="cat">Category</label>
+      <select
+        id="cat"
+        value={category}
+        onChange={(e) =>
+          setCategory(e.target.value as "Bug" | "Feature" | "Improvement")
+        }
+        disabled={loading}
+        required
       >
-        {loading ? <span className="spinner" aria-label="Submitting..."></span> : "Submit Feedback"}
-      </button>
-    </form>
-  );
+        <option value="">Select category</option>
+        <option value="Bug">Bug</option>
+        <option value="Feature">Feature</option>
+        <option value="Improvement">Improvement</option>
+      </select>
+    </div>
+
+    {/* Submit */}
+    <button
+      type="submit"
+      className="btn-primary"
+      disabled={isSubmitDisabled}
+      aria-busy={loading}
+    >
+      {loading ? (
+        <span className="spinner" aria-label="Submitting..."></span>
+      ) : (
+        "Submit Feedback"
+      )}
+    </button>
+  </form>
+);
+
 };
 
 export default AddFeedback;
